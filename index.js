@@ -35,18 +35,32 @@ async function run() {
 
         //jwt related api
 
-        app.get('/data', async(req, res)=>{
-            const result = await dataCollection.find().toArray();
-            res.send(result);
-        })
 
         // cartDataCollection 
 
-        app.get('/carts', async(req, res)=>{
+        app.post('/carts', async (req, res) => {
             const cartData = req.body;
             const result = await CartDataCollection.insertOne(cartData);
             res.send(result);
+        });
+
+        //pagination 
+        app.get('/data', async (req, res) => {
+            const page = parseInt(req.query.page);
+            const size = parseInt(req.query.size);
+            console.log('pagination quary', page, size);
+            const result = await dataCollection.find()
+            .skip(page * size)
+            .limit(size)
+            .toArray();
+            res.send(result);
         })
+
+        app.get('/DataCount', async (req, res) => {
+            const count = await dataCollection.estimatedDocumentCount();
+            res.send({ count })
+        })
+
 
 
         await client.db("admin").command({ ping: 1 });
