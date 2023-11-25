@@ -29,10 +29,25 @@ async function run() {
         await client.connect();
         // Send a ping to confirm a successful connection
         const dataCollection = client.db('managementDb').collection('data');
+        const CartDataCollection = client.db('managementDb').collection('carts');
 
 
 
         //jwt related api
+
+        app.get('/data', async(req, res)=>{
+            const result = await dataCollection.find().toArray();
+            res.send(result);
+        })
+
+        // cartDataCollection 
+
+        app.get('/carts', async(req, res)=>{
+            const cartData = req.body;
+            const result = await CartDataCollection.insertOne(cartData);
+            res.send(result);
+        })
+
 
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
