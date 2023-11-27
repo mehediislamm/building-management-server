@@ -28,9 +28,34 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
         // Send a ping to confirm a successful connection
+        const  userCollection = client.db('managementDb').collection('users');
         const dataCollection = client.db('managementDb').collection('data');
         const CartDataCollection = client.db('managementDb').collection('carts');
 
+
+        //users related api 
+        app.get('/users', async(req, res)=>{
+            const result = await userCollection.find().toArray();
+            res.send(result);
+        })
+
+        app.post('/users', async (req, res)=>{
+            const user = req.body;
+            const query = {email: user.email}
+            const existingUser = await userCollection.findOne(query);
+            if(existingUser){
+                return res.send({ message: 'user already exists', insertedId: null})
+            }
+            const result = await userCollection.insertOne(user);
+            res.send(result);
+        })
+
+        app.delete('/users/:id', async(req, res)=>{
+            const id = req.params.id;
+            const quary = {_id: new ObjectId(id)}
+            const result = await userCollection.deleteOne(quary);
+            res.send(result);
+        })
 
 
         //jwt related api
@@ -43,6 +68,36 @@ async function run() {
             const result = await CartDataCollection.insertOne(cartData);
             res.send(result);
         });
+        //my profile user dashboard 
+
+        app.get('/carts', async (req, res)=>{
+            const email = req.query.email;
+            const quary = {email: email};
+            const result = await CartDataCollection.find(quary).toArray();
+            res.send(result);
+        });
+
+        app.patch('/carts/admin/:id', async (req, res)=>{
+            const id = req.params.id;
+            const filter = {_id: new ObjectId(id)};
+            const updatedDoc = {
+                $set:{
+                    role: 'admin'
+                }
+            }
+            const result = await CartDataCollection.updateOne(filter, updatedDoc);
+            res.send(result);
+        })
+
+
+        app.delete('/carts/:id', async(req, res)=>{
+            const id = req.params.id;
+            const quary = {_id: new ObjectId(id)}
+            const result = await CartDataCollection.deleteOne(quary);
+            res.send(result);
+        })
+
+
 
         //pagination 
         app.get('/data', async (req, res) => {
@@ -50,9 +105,9 @@ async function run() {
             const size = parseInt(req.query.size);
             console.log('pagination quary', page, size);
             const result = await dataCollection.find()
-            .skip(page * size)
-            .limit(size)
-            .toArray();
+                .skip(page * size)
+                .limit(size)
+                .toArray();
             res.send(result);
         })
 
@@ -60,6 +115,9 @@ async function run() {
             const count = await dataCollection.estimatedDocumentCount();
             res.send({ count })
         })
+
+
+
 
 
 
