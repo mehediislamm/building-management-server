@@ -29,7 +29,7 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
+        // await client.connect();
         // Send a ping to confirm a successful connection
         const userCollection = client.db('managementDb').collection('users');
         const dataCollection = client.db('managementDb').collection('data');
@@ -142,37 +142,56 @@ async function run() {
         });
 
 
-        app.patch('/users/admin/:id', verifyAdmin, verifyToken, async (req, res) => {
+        
+
+        app.patch('/users/member/:id', async(req, res)=>{
             const id = req.params.id;
-            const filter = { _id: new ObjectId(id) };
+            const filter = {_id: new ObjectId(id)};
             const updatedDoc = {
-                $set: {
+                $set:{
                     role: 'member'
                 }
             }
             const result = await userCollection.updateOne(filter, updatedDoc);
             res.send(result);
+
         })
 
 
 
 
 
+        // app.patch('/users/admin/:id', verifyAdmin, verifyToken, async (req, res) => {
+        //     const id = req.params.id;
+        //     const filter = { _id: new ObjectId(id) };
+        //     const updatedDoc = {
+        //         $set: {
+        //             role: 'admin'
+        //         }
+        //     }
+        //     const result = await userCollection.updateOne(filter, updatedDoc);
+        //     res.send(result);
+        // })
 
 
-        app.get('/carts/admin/:email', verifyToken, async (req, res) => {
-            const email = req.params.email;
-            if (email !== req.decoded.email) {
-                return res.status(403).send({ message: 'forbidden access' })
-            }
-            const quary = { email: email };
-            const user = await CartDataCollection.findOne(quary);
-            let admin = false;
-            if (user) {
-                admin = user?.role === 'admin';
-            }
-            res.send({ admin });
-        });
+
+
+
+
+
+        // app.get('/carts/admin/:email', verifyToken, async (req, res) => {
+        //     const email = req.params.email;
+        //     if (email !== req.decoded.email) {
+        //         return res.status(403).send({ message: 'forbidden access' })
+        //     }
+        //     const quary = { email: email };
+        //     const user = await CartDataCollection.findOne(quary);
+        //     let admin = false;
+        //     if (user) {
+        //         admin = user?.role === 'admin';
+        //     }
+        //     res.send({ admin });
+        // });
 
 
 
@@ -214,17 +233,17 @@ async function run() {
             res.send(result);
         });
 
-        app.patch('/carts/admin/:id', async (req, res) => {
-            const id = req.params.id;
-            const filter = { _id: new ObjectId(id) };
-            const updatedDoc = {
-                $set: {
-                    role: 'admin'
-                }
-            }
-            const result = await CartDataCollection.updateOne(filter, updatedDoc);
-            res.send(result);
-        })
+        // app.patch('/carts/admin/:id', async (req, res) => {
+        //     const id = req.params.id;
+        //     const filter = { _id: new ObjectId(id) };
+        //     const updatedDoc = {
+        //         $set: {
+        //             role: 'admin'
+        //         }
+        //     }
+        //     const result = await CartDataCollection.updateOne(filter, updatedDoc);
+        //     res.send(result);
+        // })
 
 
         app.delete('/carts/:id', verifyToken, verifyAdmin, async (req, res) => {
@@ -352,8 +371,8 @@ async function run() {
 
 
 
-        await client.db("admin").command({ ping: 1 });
-        console.log("Pinged your deployment. You successfully connected to MongoDB!");
+        // await client.db("admin").command({ ping: 1 });
+        // console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
         // Ensures that the client will close when you finish/error
         // await client.close();
